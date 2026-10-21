@@ -132,7 +132,8 @@ FROM runner-build AS build
 WORKDIR /app
 COPY --from=deps /app /app
 COPY . .
-RUN find packages/paperclip-runner/runner packages/paperclip-runner/protocol -type f -exec touch -d @0 {} + \
+RUN find . -type f \( -name "*.json" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.mjs" -o -name "*.cjs" -o -name "*.rs" -o -name "*.toml" -o -name "*.sh" -o -name "*.patch" -o -name "*.sql" -o -name "*.md" -o -name "*.css" -o -name "*.html" -o -name "*.yml" -o -name "*.yaml" -o -name "*.txt" \) -exec sed -i 's/\r$//' {} + \
+  && find packages/paperclip-runner/runner packages/paperclip-runner/protocol -type f -exec touch -d @0 {} + \
   && touch -d @0 packages/paperclip-runner/rust-toolchain.toml
 # Both the browser bundle and server stamp need the source commit. Declare it
 # after the stable dependency layers, before either application build.
@@ -190,7 +191,7 @@ RUN echo "cli-tools-epoch: ${CLI_TOOLS_CACHE_EPOCH}" \
   && chown node:node /paperclip
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 COPY --chown=node:node --from=build /app /app
 
