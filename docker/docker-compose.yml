@@ -16,7 +16,11 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   server:
-    image: ghcr.io/paperclipai/paperclip:latest
+    image: mnoukhej/paperclip:latest
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: production
     # No `init: true` here on purpose. The image makes tini PID 1 itself
     # (Dockerfile ENTRYPOINT), which covers every launch path -- compose, plain
     # `docker run`, the quadlet units and the ECS task definition -- instead of
