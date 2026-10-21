@@ -10,9 +10,7 @@
 #
 services:
   paperclip:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: ghcr.io/paperclipai/paperclip:latest
     # Ceiling on processes. The image makes tini PID 1 so orphaned agent
     # descendants are reaped instead of piling up as zombies; this is the
     # backstop if something leaks anyway — the container hits its own limit and
@@ -22,6 +20,10 @@ services:
     stop_grace_period: 90s
     ports:
       - "${PAPERCLIP_PORT:-3100}:3100"
+    extra_hosts:
+      - "host.docker.internal:${HOST_IP:-192.168.1.20}"
+    env_file:
+      - .env
     environment:
       HOST: "0.0.0.0"
       PAPERCLIP_HOME: "/paperclip"
@@ -48,3 +50,4 @@ services:
     volumes:
       # Persistent data directory (database, agent workspaces, uploads)
       - "${PAPERCLIP_DATA_DIR:-../data/docker-paperclip}:/paperclip"
+      - "./ai-connections.js:/app/server/dist/routes/ai-connections.js:ro"

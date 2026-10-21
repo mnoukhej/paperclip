@@ -16,9 +16,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   server:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: ghcr.io/paperclipai/paperclip:latest
     # No `init: true` here on purpose. The image makes tini PID 1 itself
     # (Dockerfile ENTRYPOINT), which covers every launch path -- compose, plain
     # `docker run`, the quadlet units and the ECS task definition -- instead of
@@ -32,6 +30,10 @@ services:
     stop_grace_period: 90s
     ports:
       - "3100:3100"
+    extra_hosts:
+      - "host.docker.internal:${HOST_IP:-192.168.1.20}"
+    env_file:
+      - .env
     environment:
       DATABASE_URL: postgres://paperclip:paperclip@db:5432/paperclip
       PORT: "3100"
@@ -44,6 +46,7 @@ services:
       PAPERCLIP_TOOL_ACTION_SIGNING_SECRET: "${PAPERCLIP_TOOL_ACTION_SIGNING_SECRET:-}"
     volumes:
       - paperclip-data:/paperclip
+      - ./ai-connections.js:/app/server/dist/routes/ai-connections.js:ro
     depends_on:
       db:
         condition: service_healthy
